@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Banco Región A</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+    <div class="background-overlay"></div>
+    
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-university"></i> Banco Región A</h1>
+            <p class="subtitle">Sistema de Gestión Bancaria</p>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number" id="totalSucursales">{{ sucursales|length }}</div>
+                <div class="stat-label">Sucursales</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="totalPrestamos">{{ prestamos|length }}</div>
+                <div class="stat-label">Préstamos</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="activosTotales">${{ "{:,.2f}".format(sucursales|sum(attribute=3)|default(0)) }}</div>
+                <div class="stat-label">Activos totales</div>
+            </div>
+        </div>
+
+        <div class="section-card">
+            <h2 class="section-title">
+                <i class="fas fa-building"></i>
+                Gestión de sucursales
+            </h2>
+            
+            <div class="success-message" id="sucursalSuccess">
+                <i class="fas fa-check-circle"></i> Sucursal procesada exitosamente
+            </div>
+            
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th><i class="fas fa-hashtag"></i> ID</th>
+                            <th><i class="fas fa-tag"></i> Nombre</th>
+                            <th><i class="fas fa-map-marker-alt"></i> Ciudad</th>
+                            <th><i class="fas fa-dollar-sign"></i> Activos</th>
+                            <th><i class="fas fa-globe"></i> Región</th>
+                            <th><i class="fas fa-cogs"></i> Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for s in sucursales %}
+                        <tr>
+                            <td>{{ s[0] }}</td>
+                            <td>{{ s[1] }}</td>
+                            <td>{{ s[2] }}</td>
+                            <td>${{ "{:,.2f}".format(s[3]) }}</td>
+                            <td>{{ s[4] }}</td>
+                            <td>
+                                <form method="post" action="/delete_sucursal" onsubmit="return confirm('¿Eliminar sucursal?')" style="display: inline;">
+                                    <input type="hidden" name="idsucursal" value="{{ s[0] }}">
+                                    <button type="submit" class="btn-delete">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="form-section">
+                <h3 class="form-title">
+                    <i class="fas fa-plus-circle"></i>
+                    Agregar nueva sucursal
+                </h3>
+                <form method="post" action="/insert_sucursal" class="form-grid">
+                    <div class="form-group">
+                        <label>ID Sucursal:</label>
+                        <input name="idsucursal" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Nombre:</label>
+                        <input name="nombresucursal" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Ciudad:</label>
+                        <input name="ciudadsucursal" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Activos:</label>
+                        <input name="activos" type="number" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Región:</label>
+                        <input name="region" required>
+                    </div>
+                    <div class="button-container">
+                        <button type="submit" class="btn-insertar">
+                            <i class="fas fa-plus"></i> Agregar Sucursal
+                            <div class="loading-spinner" id="sucursalSpinner"></div>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="section-card">
+            <h2 class="section-title">
+                <i class="fas fa-handshake"></i>
+                Gestión de préstamos
+            </h2>
+            
+            <div class="success-message" id="prestamoSuccess">
+                <i class="fas fa-check-circle"></i> Préstamo procesado exitosamente
+            </div>
+            
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th><i class="fas fa-file-contract"></i> No. Préstamo</th>
+                            <th><i class="fas fa-building"></i> ID Sucursal</th>
+                            <th><i class="fas fa-dollar-sign"></i> Cantidad</th>
+                            <th><i class="fas fa-cogs"></i> Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for p in prestamos %}
+                        <tr>
+                            <td>{{ p[0] }}</td>
+                            <td>{{ p[1] }}</td>
+                            <td>${{ "{:,.2f}".format(p[2]) }}</td>
+                            <td>
+                                <form method="post" action="/delete_prestamo" onsubmit="return confirm('¿Eliminar préstamo?')" style="display: inline;">
+                                    <input type="hidden" name="noprestamo" value="{{ p[0] }}">
+                                    <button type="submit" class="btn-delete">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="form-section">
+                <h3 class="form-title">
+                    <i class="fas fa-plus-circle"></i>
+                    Agregar nuevo préstamo
+                </h3>
+                <form method="post" action="/insert_prestamo" class="form-grid">
+                    <div class="form-group">
+                        <label>No. Préstamo:</label>
+                        <input name="noprestamo" required>
+                    </div>
+                    <div class="form-group">
+                        <label>ID Sucursal:</label>
+                        <input name="idsucursal" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Cantidad:</label>
+                        <input name="cantidad" type="number" step="0.01" required>
+                    </div>
+                    <div class="button-container">
+                        <button type="submit" class="btn-insertar">
+                            <i class="fas fa-plus"></i> Agregar Préstamo
+                            <div class="loading-spinner" id="prestamoSpinner"></div>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
