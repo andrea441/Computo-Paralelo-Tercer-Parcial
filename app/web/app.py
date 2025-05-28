@@ -1,25 +1,31 @@
 from flask import Flask, render_template, request, redirect
 import oracledb
 
+# Se inicializa la aplicación Flask.
 app = Flask(__name__)
 
+# Se crea la conexión a la base de datos Oracle, específicamente el nodo de la región A.
 conn = oracledb.connect(
     user="system",
     password="oracle",
     dsn="oracle1:1521/XEPDB1"
 )
 
+# Ruta principal que renderiza la página de inicio.
 @app.route('/')
 def index():
+    # Se crea un cursor para ejecutar consultas SQL.
     cur = conn.cursor()
 
-    # Obtener todas las sucursales
+    # Obtener todas las sucursales.
     cur.execute("SELECT * FROM sucursal")
     sucursales = cur.fetchall()
 
+    # Obtener todos los préstamos.
     cur.execute("SELECT * FROM prestamo")
     prestamos = cur.fetchall()
 
+    # Obtener totales y sumas para mostrar en la página.
     cur.execute("SELECT COUNT(*) FROM sucursal")
     total_sucursales = cur.fetchone()[0]
 
@@ -38,6 +44,7 @@ def index():
         activos_totales=activos_totales
     )
 
+# Rutas para insertar y eliminar sucursales y préstamos.
 @app.route('/insert_sucursal', methods=['POST'])
 def insert_sucursal():
     data = (
